@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Ki Ki Shop – MLBB</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-mini">💎 Ki Ki Shop</div>
+      <div class="user-chip">
+        <span id="balChip">💰 {{ "{:,}".format(balance) }} Coins</span>
+        <span class="muted">ID {{ user_id }}</span>
+        <button class="btn ghost sm" id="btnLogout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  {% if maintenance %}
+  <div class="banner warn">🛠️ Maintenance mode – Admin only</div>
+  {% endif %}
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="shop">🛍️ Shop</button>
+    <button class="tab" data-tab="recharge">💳 ငွေဖြည့်</button>
+    <button class="tab" data-tab="history">📜 History</button>
+    <button class="tab" data-tab="settings">⚙️ PIN</button>
+  </nav>
+
+  <main class="container">
+    <!-- SHOP -->
+    <section id="panel-shop" class="panel active">
+      <div class="panel-head">
+        <h2>MLBB Auto Top-up</h2>
+        <button class="btn secondary sm" id="btnRefreshPkgs">🔄 Refresh</button>
+      </div>
+      <p class="hint">Smile.one packages · Coin ရှိမှ ဝယ်နိုင်သည် · UID + Zone ထည့်ပါ</p>
+      <div id="pkgGrid" class="pkg-grid">
+        <div class="skeleton">Packages တင်နေသည်...</div>
+      </div>
+    </section>
+
+    <!-- RECHARGE -->
+    <section id="panel-recharge" class="panel">
+      <h2>💳 Wallet ငွေဖြည့်</h2>
+      <p class="hint">Minimum {{ "{:,}".format(min_recharge) }} MMK · Screenshot အတည်ပြုချက် Admin bot ထံ ရောက်မည်</p>
+
+      <div class="pay-cards">
+        <div class="pay-card">
+          <h3>🇲🇲 K-Pay</h3>
+          <p>{{ kpay_name }}</p>
+          <code id="kpayNum">{{ kpay_number }}</code>
+          <button class="btn ghost sm copy-btn" data-copy="{{ kpay_number }}">Copy</button>
+        </div>
+        <div class="pay-card">
+          <h3>⭐ Wave Pay</h3>
+          <p>{{ wave_name }}</p>
+          <code id="waveNum">{{ wave_number }}</code>
+          <button class="btn ghost sm copy-btn" data-copy="{{ wave_number }}">Copy</button>
+        </div>
+      </div>
+
+      <form id="rechargeForm" class="form-card">
+        <label>
+          <span>Payment Method</span>
+          <select id="rMethod" required>
+            <option value="kpay">K-Pay</option>
+            <option value="wave">Wave Pay</option>
+          </select>
+        </label>
+        <label>
+          <span>Amount (MMK)</span>
+          <input type="number" id="rAmount" min="{{ min_recharge }}" step="100" placeholder="{{ min_recharge }}" required />
+        </label>
+        <label>
+          <span>Transaction Last 5 Digits</span>
+          <input type="text" id="rLast5" maxlength="5" pattern="\d{5}" placeholder="12345" required />
+        </label>
+        <label>
+          <span>Note (optional)</span>
+          <input type="text" id="rNote" maxlength="200" placeholder="အမည် / မှတ်ချက်" />
+        </label>
+        <button type="submit" class="btn primary" id="btnRecharge">တင်မည်</button>
+      </form>
+      <div id="rechargeAlert" class="alert hidden"></div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="panel-history" class="panel">
+      <div class="panel-head">
+        <h2>📜 History</h2>
+        <button class="btn secondary sm" id="btnRefreshHist">🔄</button>
+      </div>
+      <div id="histOrders"></div>
+      <div id="histRecharges"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="panel-settings" class="panel">
+      <h2>⚙️ Web PIN ပြောင်းရန်</h2>
+      <form id="pinForm" class="form-card">
+        <label>
+          <span>PIN အသစ် (၄ လုံး+)</span>
+          <input type="password" id="newPin" minlength="4" required />
+        </label>
+        <button type="submit" class="btn primary">သိမ်းမည်</button>
+      </form>
+      <div id="pinAlert" class="alert hidden"></div>
+      <p class="hint">Admin: <a href="https://t.me/{{ admin_username }}" target="_blank">@{{ admin_username }}</a></p>
+    </section>
+  </main>
+
+  <!-- BUY MODAL -->
+  <div id="buyModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose">×</button>
+      <h2 id="modalTitle">Package</h2>
+      <p id="modalPrice" class="price-line"></p>
+      <form id="buyForm">
+        <label>
+          <span>Game User ID</span>
+          <input type="text" id="gameUid" inputmode="numeric" required />
+        </label>
+        <label>
+          <span>Zone / Server ID</span>
+          <input type="text" id="zoneId" inputmode="numeric" required />
+        </label>
+        <button type="button" class="btn secondary" id="btnCheckId">🔍 ID စစ်မည်</button>
+        <div id="idResult" class="id-result hidden"></div>
+        <button type="submit" class="btn primary" id="btnBuy">🛒 Coin ဖြင့် ဝယ်မည်</button>
+      </form>
+      <div id="buyAlert" class="alert hidden"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+    window.SHOP_CFG = {
+      balance: {{ balance }},
+      minRecharge: {{ min_recharge }},
+      userId: {{ user_id }}
+    };
+  </script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
