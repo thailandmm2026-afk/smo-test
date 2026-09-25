@@ -1,0 +1,75 @@
+# Render Blueprint – Web Shop + Telegram Bot
+# Dashboard → New → Blueprint → connect this repo (or paste services manually)
+
+services:
+  # HTML Web Shop (Flask)
+  - type: web
+    name: kiki-shop-web
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python web_app.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: BOT_TOKEN
+        sync: false
+      - key: OWNER_ID
+        sync: false
+      - key: LEO_DB_PATH
+        value: /var/data/kiki_shop.db
+      - key: COOKIE_FILE
+        value: /var/data/cookies.json
+      - key: SMILE_PRICES_FILE
+        value: /var/data/smile_prices.json
+      - key: WEB_SECRET_KEY
+        generateValue: true
+      - key: KPAY_NUMBER
+        sync: false
+      - key: KPAY_NAME
+        sync: false
+      - key: WAVE_NUMBER
+        sync: false
+      - key: WAVE_NAME
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+    disk:
+      name: kiki-data
+      mountPath: /var/data
+      sizeGB: 1
+
+  # Telegram Bot (Background Worker)
+  - type: worker
+    name: kiki-shop-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: BOT_TOKEN
+        sync: false
+      - key: OWNER_ID
+        sync: false
+      - key: LEO_DB_PATH
+        value: /var/data/kiki_shop.db
+      - key: COOKIE_FILE
+        value: /var/data/cookies.json
+      - key: SMILE_PRICES_FILE
+        value: /var/data/smile_prices.json
+      - key: KPAY_NUMBER
+        sync: false
+      - key: KPAY_NAME
+        sync: false
+      - key: WAVE_NUMBER
+        sync: false
+      - key: WAVE_NAME
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+    disk:
+      name: kiki-data
+      mountPath: /var/data
+      sizeGB: 1
