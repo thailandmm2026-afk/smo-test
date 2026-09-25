@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Ki Ki Shop – Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="logo">💎</div>
+      <h1>Ki Ki Shop</h1>
+      <p class="subtitle">MLBB Diamond · Smile Auto Top-up · Web</p>
+    </div>
+
+    <div id="alert" class="alert hidden"></div>
+
+    <form id="loginForm" autocomplete="on">
+      <label>
+        <span>Telegram User ID</span>
+        <input type="text" name="user_id" id="user_id" inputmode="numeric" placeholder="ဥပမာ 7308292609" required />
+      </label>
+      <label>
+        <span>Web PIN (အနည်းဆုံး ၄ လုံး)</span>
+        <input type="password" name="pin" id="pin" minlength="4" placeholder="PIN" required />
+      </label>
+      <button type="submit" class="btn primary" id="btnLogin">Login</button>
+    </form>
+
+    <div class="help-box">
+      <h3>📌 ဘယ်လို login လုပ်မလဲ?</h3>
+      <ol>
+        <li>Telegram Bot မှာ <code>/start</code> နှိပ်ပါ</li>
+        <li>User ID ကို @userinfobot မှ ယူပါ</li>
+        <li>ပထမအကြိမ် login မှာ PIN အသစ် သတ်မှတ်ပါ (၄ လုံး+)</li>
+        <li>နောက်ပိုင်း ထို PIN ဖြင့်သာ ဝင်ပါ</li>
+      </ol>
+      <p>ပြဿနာရှိရင် Admin: <a href="https://t.me/{{ admin_username }}" target="_blank">@{{ admin_username }}</a></p>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertEl = document.getElementById('alert');
+      const btn = document.getElementById('btnLogin');
+      btn.disabled = true;
+      btn.textContent = 'စစ်ဆေးနေသည်...';
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: document.getElementById('user_id').value.trim(),
+            pin: document.getElementById('pin').value
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          window.location.href = '/shop';
+        } else {
+          showAlert(data.error || 'Login မအောင်မြင်ပါ', 'error');
+        }
+      } catch (err) {
+        showAlert('Network error', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Login';
+      }
+    });
+  </script>
+</body>
+</html>
